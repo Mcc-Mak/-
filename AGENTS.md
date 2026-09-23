@@ -23,10 +23,11 @@
 
 - 路徑：`C:\Users\ccmak.AD\Desktop\Workplace\crew-ai-orchestrator-mcp`
 - 傳輸：STDIO（本地進程）。該目錄**沒有** `mcp.json`／HTTP／SSE 端點，勿嘗試 HTTP 傳輸。
-- 啟動命令（在 MCP 目錄下執行；`agents.yml`／`tasks.yml` 有預設值）：
-  `uvx mcp-crew-ai --agents agents.yml --tasks tasks.yml`
+- 啟動命令（注意：本機未發布至 PyPI，**不能用 `uvx`**，須用本地 venv 直跑）：
+  `& "C:\Users\ccmak.AD\Desktop\Workplace\crew-ai-orchestrator-mcp\.venv\Scripts\mcp-crew-ai.exe" --agents agents.yml --tasks tasks.yml`
+  - 已註冊為 repo 級 MCP（`opencode.json` 的 `crew-ai-orchestrator`，含 `cwd` 指向 MCP 目錄）。
   - ⚠️ `Prompt.md` 範例的 `python -m crew_ai_orchestrator_mcp` 是錯的——實際模組名為 `mcp_crew_ai`，console script 為 `mcp-crew-ai`。
-  - 執行真實工作流程需要 `OPENAI_API_KEY`。缺 key 時 `run_workflow` 仍會回傳 `job_id`，但背景 job 會被標記為 `failed`。
+  - LLM 憑證：有 `OPENAI_API_KEY` 用 OpenAI；否則 fallback 至 OpenCode Zen（`~/.local/share/opencode/auth.json` 的 `opencode.key`，模型 `big-pickle`）。兩者皆無時 `run_workflow` 仍回傳 `job_id`，但背景 job 會被標記為 `failed`。
 - 可用工具（已於 `server.py` 驗證）：
   - `run_workflow(topic, process="sequential")` → **立即回傳 job_id（非同步）**，須用 `get_status` 輪詢至完成。`process` 只能是 `sequential` 或 `hierarchical`，且 `topic` 不可為空。
   - `get_status(job_id)` → 狀態：`pending` / `running` / `completed` / `failed`。
@@ -40,6 +41,12 @@
 4. 存檔為 `歷史/#{AUTO_INCREMENT:5位前導零}-{{building-slug}}-歷史.md`，例如 `歷史/00001-central-plaza-歷史.md`。slug = 英文名 kebab-case。**「歷史」＝建築物傳記式歷史，勿改叫時間線。**
 5. 編號管理：AUTO_INCREMENT 由 `.prior` 文件驅動，其序號在所有場合具最高優先權（見下「.prior 自動遞增」）。更新 `BUILDING_MATRIX.md` 為「已完成」並以 `[歷史檔案路徑](路徑)` 記錄檔案路徑。
 6. 每棟完成即執行 Git 提交＋推送（見下）。
+
+以上步驟已由 `pipeline.py` 自動化：
+
+- `python pipeline.py --check-mcp`：只驗證 MCP 連線並列出工具。
+- `python pipeline.py --dry-run [--limit N]`：純預演（解析矩陣、演算 `.prior` 編號、slug、驗收邏輯），**不呼叫 MCP、不改任何檔案**。
+- `python pipeline.py [--limit N]`：正式執行（MCP 呼叫 → 輪詢 → 驗收 → 存檔 → 更新矩陣／`.prior` → 逐棟 Git 提交＋推送至 `dev-001`）。每棟重試最多三次；失敗標「失敗」並跳過 Git 提交。
 
 ## .prior 自動遞增
 
@@ -58,5 +65,5 @@
 
 ## 打包時注意
 
-- 目前 repo 只有 `Prompt.md`，git 尚未產生任何 commit（分支 `master`）；首次需建 `dev-001`。
+- 分支已建立：`dev-001`（首次提交 `9b24b18 docs(專案): 建立專案文件與建築物矩陣`，命名機制由 `edd4177 docs(歷史): 檔案命名改為 AUTO_INCREMENT 前綴並引入 .prior` 確立；後續以 `pipeline.py` 逐棟自動提交）。
 - 所有歷史完成後：確認 `BUILDING_MATRIX.md` 全為「已完成」、全部已推送，可建標籤 `v0.1.0-dev001`。
