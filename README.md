@@ -7,7 +7,7 @@
 1. 取得兩個 XML（市區 `bnb-u`、新界 `bnb-nt`）並解析建築物中英名稱。
 2. 將建築物清單寫入 `BUILDING_MATRIX.md`（狀態「待處理」）。
 3. 逐棟經由 CrewAI 編排器 MCP 的 `run_workflow` 生成歷史，輪詢至完成。
-4. 輸出存入 `歷史/{{building-slug}}-歷史.md`（slug 為英文名 kebab-case）。
+4. 輸出存入 `歷史/#{AUTO_INCREMENT:5位前導零}-{{building-slug}}-歷史.md`（slug 為英文名 kebab-case；遞增編號由 `.prior` 決定）。
 5. 每一棟完成即 Git 提交並推送至 `dev-001` 分支。
 
 ## 資料來源
@@ -17,7 +17,7 @@
 
 ## 輸出結構
 
-- `歷史/`：每棟建築物一份歷史 Markdown。
+- `歷史/`：每棟建築物一份紀傳式歷史 Markdown（檔名前置 5 位自動遞增編號，由 `.prior` 驅動）。
 - `BUILDING_MATRIX.md`：建築物清單與處理狀態（`待處理`／`已完成`／`失敗`）。
 - `Standard.md`：歷史生成規範（缺失則流程必須停止）。
 
