@@ -65,6 +65,6 @@
 
 ## 五、與 Prompt.md 的對應
 
-- 檔案命名：`歷史/{{building-slug}}-歷史.md`（slug = 英文名 kebab-case）。
+- 檔案命名：`歷史/#{AUTO_INCREMENT:5位前導零}-{{building-slug}}-歷史.md`（slug = 英文名 kebab-case），遞增編號由 `.prior` 決定（見 `AGENTS.md`「.prior 自動遞增」）。
 - 「歷史」一詞在本規範與 `Prompt.md` 中同義為建築物的傳記式歷史在文件。
 - 本規範只管理文件結構與引用；執行流程、MCP 呼叫與 Git 控制見 `Prompt.md` 與 `AGENTS.md`。
