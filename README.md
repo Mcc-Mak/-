@@ -23,6 +23,16 @@
 
 ## 執行方式
 
-前置條件：`Standard.md` 完整存在；本機已預備 CrewAI 編排器 MCP（見 `AGENTS.md` 的啟動命令與工具清單）；實際生成需要 `OPENAI_API_KEY`。
+準備：`Standard.md` 完整存在；CrewAI 編排器 MCP 已註冊於 repo 級 `opencode.json`（STDIO；見 `AGENTS.md` 的啟動命令與工具清單）。LLM 憑證：有 `OPENAI_API_KEY` 用 OpenAI，否則 fallback 至 OpenCode Zen（模型 `big-pickle`）。
+
+一鍵自動化（Python 需能 import `mcp` 客戶端套件，可使用 MCP venv 的 python）：
+
+```powershell
+& "C:\Users\ccmak.AD\Desktop\Workplace\crew-ai-orchestrator-mcp\.venv\Scripts\python.exe" pipeline.py --check-mcp   # 驗證 MCP 連線
+& "C:\Users\ccmak.AD\Desktop\Workplace\crew-ai-orchestrator-mcp\.venv\Scripts\python.exe" pipeline.py --dry-run --limit 3   # 純預演，不產生副作用
+& "C:\Users\ccmak.AD\Desktop\Workplace\crew-ai-orchestrator-mcp\.venv\Scripts\python.exe" pipeline.py   # 正式執行全部待處理建築物
+```
+
+流水線行為：讀取 `BUILDING_MATRIX.md`「待處理」行 → 依 `.prior` 決定 AUTO_INCREMENT → `run_workflow` → 輪詢 `get_status` → 依 `Standard.md` 第四章驗收（缺引用／文獻未分級排序／只有年表 → 拒絕）→ 存檔 `歷史/NNNNN-{{slug}}-歷史.md` → 更新矩陣與 `.prior` → 逐棟 Git 提交並推送至 `dev-001`。任何一棟重試最多三次，仍失敗則標「失敗」於備註並跳過該棟提交。
 
 詳細運作規則（MCP 配置、Git 控制、錯誤處理）見 `AGENTS.md`。
